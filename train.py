@@ -13,7 +13,7 @@ height = 28
 #hyper parametar
 batch_size = 32
 noise_dims = 1
-iterations = 100#1000000
+iterations = 1000000
 train_d = 3#generatorの学習一回に対して、discriminatorを学習させる回数
 inter = 0.01
 
@@ -77,7 +77,7 @@ if __name__ == '__main__':
             sess.run(train_step_G)
 
             # 10000iteration毎に画像を保存
-            if (i + 1) % 100 == 0:
+            if (i + 1) % 10000 == 0:
                 #- 一様分布から画像を生成し、画像を保存する -#
                 uni = sess.run(image_fake_uniform)
                 #ディレクトリの作成
