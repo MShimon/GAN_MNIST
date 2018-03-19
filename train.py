@@ -1,7 +1,6 @@
 import numpy as np
 import tensorflow as tf
 import os
-from PIL import Image
 #自作関数
 from Discriminator import Discriminator
 from Generator import Generator
@@ -11,18 +10,20 @@ import data
 width = 28
 height = 28
 #hyper parametar
-batch_size = 32
+save_width = 4
+save_height = 8
+batch_size = save_width * save_height#バッチサイズ
 noise_dims = 1
-iterations = 1000000
-train_d = 3#generatorの学習一回に対して、discriminatorを学習させる回数
-inter = 0.01
+iterations = 1000
+train_d = 1#generatorの学習一回に対して、discriminatorを学習させる回数
+#画像を保存するディレクトリ
+save_image_dir = "./generated_image"
 
 if __name__ == '__main__':
     # 必要な分だけメモリを確保するようにする
     config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True))
     session = tf.Session(config=config)
     # 生成画像を保存する用のディレクトリ
-    save_image_dir = "./generated_image"
     if not os.path.exists(save_image_dir):
         os.mkdir(save_image_dir)
 
@@ -43,7 +44,7 @@ if __name__ == '__main__':
     #placeholder
     _images_real = tf.placeholder(tf.float32, [None, width, height, 1])#入力画像用のplaceholder
     # 共通式
-    noise = tf.random_uniform([batch_size, noise_dims])  # ノイズの取得
+    noise = tf.random_normal([batch_size, noise_dims])  # ノイズの取得
     images_fake = generator.forward(noise)  # ノイズからgeneratorが生成した画像
     output_real = discriminator.forward(_images_real)# 本物の画像を入力した時のdiscriminatorの出力
     output_fake = discriminator.forward(images_fake)# Generatorが出力した画像を入力した時のdiscriminatorの出力
@@ -53,13 +54,6 @@ if __name__ == '__main__':
     # 更新式
     train_step_D = discriminator.train(loss_D)
     train_step_G = generator.train(loss_G)
-
-    #- 学習途中での生成画像を保存するための処理 -#
-    tmp_noise = np.arange(0.0, 1.0001, inter)#0〜1の一様分布を生成
-    num_generated_image = tmp_noise.shape[0]  # 生成される画像数
-    tmp_noise = tmp_noise.reshape(num_generated_image, 1).astype(np.float32)#今回のノイズは1次元
-    uniform_noise = tf.constant(tmp_noise)
-    image_fake_uniform = generator.forward(uniform_noise)# 一様分布から画像を生成
 
     #- 学習開始 -#
     with tf.Session() as sess:
@@ -77,17 +71,11 @@ if __name__ == '__main__':
             sess.run(train_step_G)
 
             # 10000iteration毎に画像を保存
-            if (i + 1) % 10000 == 0:
-                #- 一様分布から画像を生成し、画像を保存する -#
-                uni = sess.run(image_fake_uniform)
+            if i % 100 == 0:
                 #ディレクトリの作成
-                save_epoch_dir = save_image_dir +"/epoch:" + str(i+1)
-                if not os.path.exists(save_epoch_dir):
-                    os.mkdir(save_epoch_dir)
-                #一枚づつ画像を保存
-                for i in range(num_generated_image):
-                    value_noise = round(inter * i ,2)
-                    res = uni[i].reshape(width,height)
-                    pilImg = Image.fromarray(np.uint8(res*255))#255を掛けて正規化
-                    file_name = str(value_noise) + ".png"  # ファイル名
-                    pilImg.save(save_epoch_dir + "/" + file_name)
+                file_name = "iterations:" + str(i) + ".png"
+                save_name = save_image_dir +"/" + file_name
+                res = sess.run(images_fake)#generatorの生成する画像を取得
+                res = res.reshape(save_width * save_height , width, height)#channel情報を消すためにreshape
+                res = np.uint8(np.clip(res,0.0,1.0)*255)#クリッピング後に、pillow用にuint8に変換
+                data.visualize_image(res,save_width,save_height,mode="save",dir=save_name)

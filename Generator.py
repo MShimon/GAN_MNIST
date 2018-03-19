@@ -27,8 +27,10 @@ class Generator():
             net = fully_connected(noise, 1024, activation_fn=relu, weights_regularizer=l2_regularizer(self.weight_decay))
             net = fully_connected(net, 7 * 7 * 256, activation_fn=relu, weights_regularizer=l2_regularizer(self.weight_decay))
             net = tf.reshape(net, [-1, 7, 7, 256])
-            net = conv2d_transpose(net, 64, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
-            net = conv2d_transpose(net, 32, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = conv2d_transpose(net, 64, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm,
+                                   weights_regularizer=l2_regularizer(self.weight_decay))
+            net = conv2d_transpose(net, 32, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm,
+                                   weights_regularizer=l2_regularizer(self.weight_decay))
             net = conv2d(net, 1, 4, normalizer_fn=None, activation_fn=tf.tanh, weights_regularizer=l2_regularizer(self.weight_decay))
 
         return net

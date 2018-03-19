@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib as plt
 from keras.datasets import mnist
+from PIL import Image
 
 #@brief:MNISTのデータセットを読み込む
 #@return:MNISTの訓練画像のみ 0〜1で正規化 shape(60000,28,28,1)
@@ -20,16 +21,18 @@ def load_MNIST():
 
 #@brief:複数枚の画像を並べて表示する
 #@param:digits  表示したい画像のリスト
-#       vis_width   横に並べる数
-#       vis_height  縦に並べる数
-def visualize_image(digits, vis_width, vis_height):
-    for h in range(vis_height):
-        for w in range(vis_width):
+#       num_width   横に並べる数
+#       num_height  縦に並べる数
+#       mode    show:画像を表示する, save:画像を保存する
+#
+def visualize_image(digits, num_width, num_height,mode = None,dir = None):
+    for h in range(num_height):
+        for w in range(num_width):
             # 画像を水平方向に連結していく
             if w != 0:
-                tmp_img = np.hstack((tmp_img, digits[w + h * vis_width]))
+                tmp_img = np.hstack((tmp_img, digits[w + h * num_width]))
             else:
-                tmp_img = digits[w + h * vis_width]
+                tmp_img = digits[w + h * num_width]
 
         # 画像を垂直方向に連結する
         if h != 0:
@@ -37,6 +40,14 @@ def visualize_image(digits, vis_width, vis_height):
         else:
             img = tmp_img
 
-    plt.imshow(img, cmap='gray')
-    plt.axis('off')
-    plt.show()
+    #表示モード
+    if mode == "show":
+        plt.imshow(img, cmap='gray')
+        plt.axis('off')
+        plt.show()
+    #保存モード
+    elif mode == "save":
+        if not dir == None:#ファイル名がしていされていれば
+            pilImg = Image.fromarray(img)  # uintに変換
+            pilImg.save(dir)
+
