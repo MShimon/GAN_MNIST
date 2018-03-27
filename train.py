@@ -14,7 +14,7 @@ save_width = 4
 save_height = 8
 batch_size = save_width * save_height#バッチサイズ
 noise_dims = 1
-iterations = 1000
+iterations = 100000
 train_d = 1#generatorの学習一回に対して、discriminatorを学習させる回数
 #画像を保存するディレクトリ
 save_image_dir = "./generated_image"
@@ -83,11 +83,11 @@ if __name__ == '__main__':
             sess.run(train_step_G)
             #tensorboardに書き込み
             w_summary = sess.run(summary, feed_dict={_images_real: images_real})
-            writer.add_summary(w_summary, iterations)
+            writer.add_summary(w_summary, i)
 
 
             # 10000iteration毎に画像を保存
-            if i % 100 == 0:
+            if i % 1000 == 0:
                 #ディレクトリの作成
                 file_name = "iterations:" + str(i) + ".png"
                 save_name = save_image_dir +"/" + file_name
