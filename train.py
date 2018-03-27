@@ -18,6 +18,8 @@ iterations = 1000
 train_d = 1#generatorの学習一回に対して、discriminatorを学習させる回数
 #画像を保存するディレクトリ
 save_image_dir = "./generated_image"
+#tensorboardのlogを吐くディレクトリ
+log_dir = "gan_mnist"
 
 if __name__ == '__main__':
     # 必要な分だけメモリを確保するようにする
@@ -55,11 +57,21 @@ if __name__ == '__main__':
     train_step_D = discriminator.train(loss_D)
     train_step_G = generator.train(loss_G)
 
+    #tensorboardに記述
+    tf.summary.scalar("loss_discriminator",loss_D)
+    tf.summary.scalar("loss_generator",loss_G)
+    summary = tf.summary.merge_all()
+
     #- 学習開始 -#
     with tf.Session() as sess:
+        #TensorBoardの設定
+        merged = tf.summary.merge_all()
+        writer = tf.summary.FileWriter(log_dir, sess.graph_def)
+        #初期化
         sess.run(tf.global_variables_initializer())
         sess.run(tf.local_variables_initializer())
         threads = tf.train.start_queue_runners(sess, coord)
+        #学習
         for i in range(iterations):  # 学習回数
             # - discriminatorの更新 -#
             for k in range(train_d):
@@ -69,6 +81,10 @@ if __name__ == '__main__':
                 sess.run(train_step_D, feed_dict={_images_real: images_real})
             # - generatorの更新 -#
             sess.run(train_step_G)
+            #tensorboardに書き込み
+            w_summary = sess.run(summary, feed_dict={_images_real: images_real})
+            writer.add_summary(w_summary, iterations)
+
 
             # 10000iteration毎に画像を保存
             if i % 100 == 0:
