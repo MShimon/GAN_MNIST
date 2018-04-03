@@ -4,7 +4,7 @@ from tensorflow.contrib.layers import conv2d,conv2d_transpose,flatten
 from tensorflow.contrib.layers import batch_norm
 from tensorflow.contrib.layers import l2_regularizer
 #活性化関数
-relu = tf.nn.relu
+lrelu = tf.nn.leaky_relu
 sigmoid = tf.nn.sigmoid
 #自作module
 from Activation import log
@@ -24,12 +24,12 @@ class Generator():
     #@return:順伝播の結果
     def forward(self,noise):
         with tf.variable_scope(self.scope, reuse=tf.AUTO_REUSE):
-            net = fully_connected(noise, 1024, activation_fn=relu, weights_regularizer=l2_regularizer(self.weight_decay))
-            net = fully_connected(net, 7 * 7 * 256, activation_fn=relu, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = fully_connected(noise, 1024, activation_fn=lrelu, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = fully_connected(net, 7 * 7 * 256, activation_fn=lrelu, weights_regularizer=l2_regularizer(self.weight_decay))
             net = tf.reshape(net, [-1, 7, 7, 256])
-            net = conv2d_transpose(net, 64, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm,
+            net = conv2d_transpose(net, 64, [4, 4], stride=2, activation_fn=lrelu, normalizer_fn=batch_norm,
                                    weights_regularizer=l2_regularizer(self.weight_decay))
-            net = conv2d_transpose(net, 32, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm,
+            net = conv2d_transpose(net, 32, [4, 4], stride=2, activation_fn=lrelu, normalizer_fn=batch_norm,
                                    weights_regularizer=l2_regularizer(self.weight_decay))
             net = conv2d(net, 1, 4, normalizer_fn=None, activation_fn=tf.tanh, weights_regularizer=l2_regularizer(self.weight_decay))
 

@@ -4,7 +4,7 @@ from tensorflow.contrib.layers import conv2d,conv2d_transpose,flatten
 from tensorflow.contrib.layers import batch_norm
 from tensorflow.contrib.layers import l2_regularizer
 #活性化関数
-relu = tf.nn.relu
+lrelu = tf.nn.leaky_relu
 sigmoid = tf.nn.sigmoid
 #自作module
 from Activation import log
@@ -24,10 +24,10 @@ class Discriminator():
     #@return:順伝播の結果
     def forward(self,img):
         with tf.variable_scope(self.scope, reuse=tf.AUTO_REUSE):
-            net = conv2d(img, 64, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
-            net = conv2d(net, 128, [4, 4], stride=2, activation_fn=relu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = conv2d(img, 64, [4, 4], stride=2, activation_fn=lrelu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = conv2d(net, 128, [4, 4], stride=2, activation_fn=lrelu, normalizer_fn=batch_norm, weights_regularizer=l2_regularizer(self.weight_decay))
             net = flatten(net)
-            net = fully_connected(net, 1024, activation_fn=relu, weights_regularizer=l2_regularizer(self.weight_decay))
+            net = fully_connected(net, 1024, activation_fn=lrelu, weights_regularizer=l2_regularizer(self.weight_decay))
             net = fully_connected(net, 1, activation_fn=sigmoid, weights_regularizer=l2_regularizer(self.weight_decay))
         return net
 
